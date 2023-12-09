@@ -24,50 +24,49 @@ impl Hand {
             .map(|(k, v)| (k, v.len() as u32))
             .collect();
 
-        let num_jokers = match grouped_cards.iter().find(|(c, _)| **c == 'J') {
-            None => 0,
-            Some(v) => v.1,
-        };
-
         if grouped_cards
             .iter()
-            .any(|card_type_occurences| card_type_occurences.1 + num_jokers == 5)
+            .any(|card_type_occurences| card_type_occurences.1 == 5)
         {
             return 7;
         }
         if grouped_cards
             .iter()
-            .any(|card_type_occurences| card_type_occurences.1 + num_jokers == 4)
+            .any(|card_type_occurences| card_type_occurences.1 == 4)
         {
             return 6;
         }
-
-        let three_of_a_kind_found = grouped_cards
+        if grouped_cards
             .iter()
-            .any(|card_type_occurences| card_type_occurences.1 == 3);
-        let num_pairs = grouped_cards
-            .iter()
-            .filter(|card_type_occurences| card_type_occurences.1 == 2)
-            .collect::<Vec<_>>();
-
-        if ((three_of_a_kind_found || num_jokers == 2) && num_pairs.len() == 1)
-            || (num_pairs.len() == 2 && num_jokers == 1)
+            .any(|card_type_occurences| card_type_occurences.1 == 3)
+            && grouped_cards
+                .iter()
+                .any(|card_type_occurences| card_type_occurences.1 == 2)
         {
             return 5;
         }
         if grouped_cards
             .iter()
-            .any(|card_type_occurences| card_type_occurences.1 + num_jokers == 3)
+            .any(|card_type_occurences| card_type_occurences.1 == 3)
         {
             return 4;
         }
-        if num_pairs.len() == 0 && num_jokers == 2
-            || (num_pairs.len() == 1 && num_jokers == 1)
-            || num_pairs.len() == 2
+        if grouped_cards
+            .iter()
+            .filter(|card_type_occurences| card_type_occurences.1 == 2)
+            .collect::<Vec<_>>()
+            .len()
+            == 2
         {
             return 3;
         }
-        if (num_pairs.len() == 0 && num_jokers == 1) || num_pairs.len() == 1 {
+        if grouped_cards
+            .iter()
+            .filter(|card_type_occurences| card_type_occurences.1 == 2)
+            .collect::<Vec<_>>()
+            .len()
+            == 1
+        {
             return 2;
         }
         return 1;
@@ -86,6 +85,7 @@ fn order_hands(hand_a: &Hand, hand_b: &Hand) -> Ordering {
         ('A', 13),
         ('K', 12),
         ('Q', 11),
+        ('J', 10),
         ('T', 9),
         ('9', 8),
         ('8', 7),
@@ -95,7 +95,6 @@ fn order_hands(hand_a: &Hand, hand_b: &Hand) -> Ordering {
         ('4', 3),
         ('3', 2),
         ('2', 1),
-        ('J', 0),
     ]);
 
     let ranked_cards_a = hand_a
